@@ -1,1 +1,1 @@
-最后一次部署: 2026-09-02 08:54:37 UTC | 区域: asia-northeast3 | URL: https://zdsa--proxy-app-web_server.modal.run
+最后一次部署: 2026-09-02 20:53:34 UTC | 区域: us-east | URL: https://zdsamsnn--proxy-app-web-server.modal.run
