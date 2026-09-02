@@ -1,4 +1,4 @@
-name: Modal Argo + 哪吒 混合部署
+name: Modal Argo + 区域选择 哪吒 混合部署
 
 on:
   workflow_dispatch:
