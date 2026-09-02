@@ -1,0 +1,450 @@
+name: Modal Argo + 哪吒 混合部署
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: '操作类型'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - 'deploy'
+          - 'stop'
+      deploy_region:
+        description: '选择部署区域（Broad 自动分配 / Specific 精确指定）'
+        required: false
+        default: 'us-east | 美国东部（自动分配）'
+        type: choice
+        options:
+          # ====== 美国东部 US-EAST ======
+          - 'us-east | 美国东部（自动分配）'
+          - 'us-east-1 | AWS 弗吉尼亚州'
+          - 'us-east-2 | AWS 俄亥俄州'
+          - 'us-east1 | GCP 南卡罗来纳州'
+          - 'us-east4 | GCP 弗吉尼亚州'
+          - 'us-east5 | GCP 俄亥俄州'
+          - 'us-ashburn-1 | OCI 弗吉尼亚州'
+          - 'eastus | AZR 弗吉尼亚州'
+          - 'eastus2 | AZR 弗吉尼亚州2'
+          # ====== 美国中部 US-CENTRAL ======
+          - 'us-central | 美国中部（自动分配）'
+          - 'us-central1 | GCP 艾奥瓦州'
+          - 'us-chicago-1 | OCI 芝加哥'
+          - 'us-phoenix-1 | OCI 凤凰城'
+          - 'centralus | AZR 艾奥瓦州'
+          - 'northcentralus | AZR 伊利诺伊州'
+          - 'southcentralus | AZR 德克萨斯州'
+          - 'westcentralus | AZR 怀俄明州'
+          # ====== 美国南部 US-SOUTH ======
+          - 'us-south | 美国南部（自动分配）'
+          - 'us-south1 | GCP 达拉斯'
+          # ====== 美国西部 US-WEST ======
+          - 'us-west | 美国西部（自动分配）'
+          - 'us-west-1 | AWS 加利福尼亚'
+          - 'us-west-2 | AWS 俄勒冈州'
+          - 'us-west1 | GCP 俄勒冈州'
+          - 'us-west2 | GCP 洛杉矶'
+          - 'us-west3 | GCP 盐湖城'
+          - 'us-west4 | GCP 拉斯维加斯'
+          - 'us-sanjose-1 | OCI 圣何塞'
+          - 'westus | AZR 加利福尼亚'
+          - 'westus2 | AZR 华盛顿州'
+          - 'westus3 | AZR 亚利桑那州'
+          # ====== 欧洲西部 EU-WEST ======
+          - 'eu-west | 欧洲西部（自动分配）'
+          - 'eu-central-1 | AWS 法兰克福'
+          - 'eu-west-1 | AWS 爱尔兰'
+          - 'eu-west-3 | AWS 巴黎'
+          - 'europe-west1 | GCP 比利时'
+          - 'europe-west3 | GCP 法兰克福'
+          - 'europe-west4 | GCP 荷兰'
+          - 'eu-frankfurt-1 | OCI 法兰克福'
+          - 'eu-paris-1 | OCI 巴黎'
+          - 'westeurope | AZR 荷兰'
+          - 'germanywestcentral | AZR 法兰克福'
+          - 'francecentral | AZR 巴黎'
+          - 'polandcentral | AZR 华沙'
+          # ====== 欧洲北部 EU-NORTH ======
+          - 'eu-north | 北欧（自动分配）'
+          - 'eu-north-1 | AWS 斯德哥尔摩'
+          - 'northeurope | AZR 爱尔兰'
+          - 'swedencentral | AZR 瑞典'
+          - 'norwayeast | AZR 奥斯陆'
+          # ====== 欧洲南部 EU-SOUTH ======
+          - 'eu-south | 欧洲南部（自动分配）'
+          - 'eu-south-1 | AWS 米兰'
+          - 'eu-south-2 | AWS 西班牙'
+          - 'italynorth | AZR 米兰'
+          - 'spaincentral | AZR 马德里'
+          # ====== 亚太东北 AP-NORTHEAST ======
+          - 'ap-northeast | 亚太东北（自动分配）'
+          - 'ap-northeast-1 | AWS 东京'
+          - 'ap-northeast-3 | AWS 大阪'
+          - 'asia-northeast1 | GCP 东京'
+          - 'asia-northeast2 | GCP 大阪'
+          - 'asia-northeast3 | GCP 首尔'
+          - 'ap-tokyo-1 | OCI 东京'
+          - 'japaneast | AZR 东京'
+          - 'japanwest | AZR 大阪'
+          # ====== 亚太东南 AP-SOUTHEAST ======
+          - 'ap-southeast | 亚太东南（自动分配）'
+          - 'ap-southeast-1 | AWS 新加坡'
+          - 'ap-southeast-3 | AWS 雅加达'
+          - 'asia-southeast1 | GCP 新加坡'
+          - 'asia-southeast2 | GCP 雅加达'
+          - 'southeastasia | AZR 新加坡'
+          - 'malaysiawest | AZR 吉隆坡'
+          # ====== 亚太南部 AP-SOUTH ======
+          - 'ap-south | 亚太南部（自动分配）'
+          - 'ap-south-1 | AWS 孟买'
+          - 'asia-south1 | GCP 孟买'
+          - 'asia-south2 | GCP 德里'
+          - 'centralindia | AZR 浦那'
+          - 'westindia | AZR 孟买'
+          - 'southindia | AZR 金奈'
+          # ====== 亚太墨尔本 / 澳大利亚 ======
+          - 'ap-melbourne | 亚太墨尔本（自动分配）'
+          - 'ap-melbourne-1 | OCI 墨尔本'
+          - 'au | 澳大利亚（别名）'
+          - 'australia-southeast1 | GCP 悉尼'
+          - 'ap-sydney-1 | OCI 悉尼'
+          - 'australiaeast | AZR 悉尼'
+          # ====== 英国 UK ======
+          - 'uk | 英国（自动分配）'
+          - 'eu-west-2 | AWS 伦敦'
+          - 'europe-west2 | GCP 伦敦'
+          - 'uk-london-1 | OCI 伦敦'
+          - 'uksouth | AZR 伦敦'
+          - 'ukwest | AZR 卡迪夫'
+          # ====== 加拿大 CA ======
+          - 'ca | 加拿大（自动分配）'
+          - 'ca-central-1 | AWS 蒙特利尔'
+          - 'northamerica-northeast2 | GCP 多伦多'
+          - 'ca-toronto-1 | OCI 多伦多'
+          - 'ca-montreal-1 | OCI 蒙特利尔'
+          - 'canadacentral | AZR 多伦多'
+          - 'canadaeast | AZR 魁北克'
+          # ====== 中东 ME ======
+          - 'me | 中东（自动分配）'
+          - 'me-west1 | GCP 特拉维夫'
+          - 'uaenorth | AZR 迪拜'
+          - 'qatarcentral | AZR 多哈'
+          # ====== 南美 SA ======
+          - 'sa | 南美（自动分配）'
+          - 'sa-east-1 | AWS 圣保罗'
+          - 'southamerica-east1 | GCP 圣保罗'
+          - 'brazilsouth | AZR 圣保罗'
+          # ====== 非洲 AF ======
+          - 'af | 非洲（自动分配）'
+          - 'southafricanorth | AZR 约翰内斯堡'
+          # ====== 墨西哥 MX ======
+          - 'mx | 墨西哥（自动分配）'
+          - 'mexicocentral | AZR 墨西哥城'
+          # ====== 日本 JP (Alias) ======
+          - 'jp | 日本（别名）'
+      modal_token_id:
+        description: 'Modal 令牌ID（ak-xxxxx，留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      modal_token_secret:
+        description: 'Modal 令牌密钥（as-xxxxx，留空则使用 Secret）'
+        required: false
+        default: ''
+        type: string
+      nezha_server:
+        description: '哪吒服务器地址（v1: domain:port / v0: domain，留空用 Secret）'
+        required: false
+        default: ''
+        type: string
+      nezha_key:
+        description: '哪吒密钥（留空用 Secret）'
+        required: false
+        default: ''
+        type: string
+      uuid:
+        description: 'UUID（留空用 Secret 或默认）'
+        required: false
+        default: ''
+        type: string
+      nezha_port:
+        description: '哪吒端口（仅 v0，留空用 Secret）'
+        required: false
+        default: ''
+        type: string
+      argo_domain:
+        description: 'Argo 固定隧道域名（留空用 Secret）'
+        required: false
+        default: ''
+        type: string
+      argo_auth:
+        description: 'Argo Token 或 TunnelSecret（留空用 Secret）'
+        required: false
+        default: ''
+        type: string
+
+  schedule:
+    # 每月 1-23 日 UTC 18:00 自动部署（防止休眠）
+    - cron: '0 18 1-23 * *'
+  repository_dispatch:
+    types: [service-down-alert]
+
+jobs:
+  deploy:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    env:
+      MODAL_APP_NAME: ${{ secrets.MODAL_APP_NAME || 'proxy-app' }}
+      SUB_PATH: ${{ secrets.SUB_PATH || 'sub' }}
+
+    steps:
+      - name: 检查触发事件
+        run: |
+          echo "Workflow triggered by: ${{ github.event_name }}"
+          if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
+            echo "触发事件类型: ${{ github.event.action }}"
+            echo "收到下线通知，开始自动恢复部署..."
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "手动触发部署..."
+          else
+            echo "定时任务触发部署..."
+          fi
+
+      - name: 解析部署区域
+        run: |
+          FULL_INPUT="${{ github.event.inputs.deploy_region || 'us-east | 美国东部（自动分配）' }}"
+
+          if echo "$FULL_INPUT" | grep -q '|'; then
+            REGION=$(echo "$FULL_INPUT" | cut -d'|' -f1 | xargs)
+            REGION_DESC=$(echo "$FULL_INPUT" | cut -d'|' -f2 | xargs)
+          else
+            REGION=$(echo "$FULL_INPUT" | xargs)
+            REGION_DESC="API/定时触发"
+          fi
+
+          # 处理别名
+          case "$REGION" in
+            us-east) REGION="us-east" ;;
+            us-central) REGION="us-central" ;;
+            us-west) REGION="us-west" ;;
+            eu-west) REGION="eu-west" ;;
+            ap-northeast) REGION="ap-northeast" ;;
+            ap-southeast) REGION="ap-southeast" ;;
+            jp) REGION="ap-northeast-1" ;;
+            au) REGION="australia-southeast1" ;;
+            uk) REGION="eu-west-2" ;;
+            ca) REGION="ca-central-1" ;;
+          esac
+
+          echo "DEPLOY_REGION=$REGION" >> $GITHUB_ENV
+          echo "REGION_DESC=$REGION_DESC" >> $GITHUB_ENV
+          echo "📍 部署区域: $REGION ($REGION_DESC)"
+
+      - name: 解析变量（工作流输入优先，Secret 兜底）
+        run: |
+          # Modal Token
+          if [ -n "${{ github.event.inputs.modal_token_id }}" ]; then
+            echo "RESOLVED_MODAL_TOKEN_ID=${{ github.event.inputs.modal_token_id }}" >> $GITHUB_ENV
+          else
+            echo "RESOLVED_MODAL_TOKEN_ID=${{ secrets.MODAL_TOKEN_ID }}" >> $GITHUB_ENV
+          fi
+          if [ -n "${{ github.event.inputs.modal_token_secret }}" ]; then
+            echo "RESOLVED_MODAL_TOKEN_SECRET=${{ github.event.inputs.modal_token_secret }}" >> $GITHUB_ENV
+          else
+            echo "RESOLVED_MODAL_TOKEN_SECRET=${{ secrets.MODAL_TOKEN_SECRET }}" >> $GITHUB_ENV
+          fi
+
+          # 哪吒
+          if [ -n "${{ github.event.inputs.nezha_server }}" ]; then
+            echo "RESOLVED_NEZHA_SERVER=${{ github.event.inputs.nezha_server }}" >> $GITHUB_ENV
+          else
+            echo "RESOLVED_NEZHA_SERVER=${{ secrets.NEZHA_SERVER }}" >> $GITHUB_ENV
+          fi
+          if [ -n "${{ github.event.inputs.nezha_key }}" ]; then
+            echo "RESOLVED_NEZHA_KEY=${{ github.event.inputs.nezha_key }}" >> $GITHUB_ENV
+          else
+            echo "RESOLVED_NEZHA_KEY=${{ secrets.NEZHA_KEY }}" >> $GITHUB_ENV
+          fi
+          if [ -n "${{ github.event.inputs.uuid }}" ]; then
+            echo "RESOLVED_UUID=${{ github.event.inputs.uuid }}" >> $GITHUB_ENV
+          else
+            echo "RESOLVED_UUID=${{ secrets.UUID }}" >> $GITHUB_ENV
+          fi
+          if [ -n "${{ github.event.inputs.nezha_port }}" ]; then
+            echo "RESOLVED_NEZHA_PORT=${{ github.event.inputs.nezha_port }}" >> $GITHUB_ENV
+          else
+            echo "RESOLVED_NEZHA_PORT=${{ secrets.NEZHA_PORT }}" >> $GITHUB_ENV
+          fi
+
+          # Argo
+          if [ -n "${{ github.event.inputs.argo_domain }}" ]; then
+            echo "RESOLVED_ARGO_DOMAIN=${{ github.event.inputs.argo_domain }}" >> $GITHUB_ENV
+          else
+            echo "RESOLVED_ARGO_DOMAIN=${{ secrets.ARGO_DOMAIN }}" >> $GITHUB_ENV
+          fi
+          if [ -n "${{ github.event.inputs.argo_auth }}" ]; then
+            echo "RESOLVED_ARGO_AUTH=${{ github.event.inputs.argo_auth }}" >> $GITHUB_ENV
+          else
+            echo "RESOLVED_ARGO_AUTH=${{ secrets.ARGO_AUTH }}" >> $GITHUB_ENV
+          fi
+
+          echo "✅ 变量解析完成"
+
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: pip install modal fastapi requests
+
+      - name: 配置 Modal 令牌
+        run: |
+          modal token set --token-id "$RESOLVED_MODAL_TOKEN_ID" --token-secret "$RESOLVED_MODAL_TOKEN_SECRET"
+
+      - name: 停止旧应用（干净部署）
+        run: |
+          modal app stop "${{ env.MODAL_APP_NAME }}" || true
+          echo "✅ 已尝试停止旧应用"
+
+      - name: 创建/更新 Modal Secret
+        run: |
+          modal secret delete modal-secrets --yes || true
+
+          modal secret create modal-secrets \
+            UUID="${RESOLVED_UUID:-be16536e-5c3c-44bc-8cb7-b7d0ddc3d951}" \
+            MODAL_USER_NAME="${{ secrets.MODAL_USER_NAME }}" \
+            MODAL_APP_NAME="${{ env.MODAL_APP_NAME }}" \
+            ARGO_DOMAIN="$RESOLVED_ARGO_DOMAIN" \
+            ARGO_AUTH="$RESOLVED_ARGO_AUTH" \
+            ARGO_PORT="${{ secrets.ARGO_PORT || '8001' }}" \
+            SUB_PATH="${{ env.SUB_PATH }}" \
+            NAME="${{ secrets.NAME || 'Modal' }}" \
+            CFIP="${{ secrets.CFIP || 'www.visa.com.tw' }}" \
+            CFPORT="${{ secrets.CFPORT || '443' }}" \
+            NEZHA_SERVER="$RESOLVED_NEZHA_SERVER" \
+            NEZHA_KEY="$RESOLVED_NEZHA_KEY" \
+            NEZHA_PORT="$RESOLVED_NEZHA_PORT" \
+            BOT_TOKEN="${{ secrets.BOT_TOKEN }}" \
+            CHAT_ID="${{ secrets.CHAT_ID }}" \
+            UPLOAD_URL="${{ secrets.UPLOAD_URL }}" \
+            PROJECT_URL="${{ secrets.PROJECT_URL }}" \
+            DEPLOY_REGION="$DEPLOY_REGION" \
+            AUTO_ACCESS="${{ secrets.AUTO_ACCESS || 'true' }}" \
+            KEEPALIVE_INTERVAL="${{ secrets.KEEPALIVE_INTERVAL || '120' }}"
+
+          echo "✅ Modal Secret 创建成功（区域: $DEPLOY_REGION）"
+
+      - name: 部署到 Modal
+        id: deploy
+        run: |
+          echo "🚀 正在部署到 Modal..."
+          echo "   📍 区域: $DEPLOY_REGION ($REGION_DESC)"
+          echo "   📦 应用: ${{ env.MODAL_APP_NAME }}"
+
+          # 优先使用 app.py（混合版），不存在则回退
+          if [ -f "app.py" ]; then
+            DEPLOY_FILE="app.py"
+          elif [ -f "modal_app_argo2.py" ]; then
+            DEPLOY_FILE="modal_app_argo2.py"
+          else
+            DEPLOY_FILE="modal_app_argo.py"
+          fi
+          echo "   📄 使用文件: $DEPLOY_FILE"
+
+          OUTPUT=$(modal deploy "$DEPLOY_FILE" 2>&1) || true
+          echo "$OUTPUT"
+
+          URL=$(echo "$OUTPUT" | grep -oE 'https://[a-zA-Z0-9._-]+\.modal\.run' | head -1)
+
+          if [ -z "$URL" ]; then
+            echo "::warning::未能从输出提取 URL，尝试继续..."
+            # 尝试构造常见 URL
+            if [ -n "${{ secrets.MODAL_USER_NAME }}" ]; then
+              URL="https://${{ secrets.MODAL_USER_NAME }}--${{ env.MODAL_APP_NAME }}-web_server.modal.run"
+              echo "使用构造 URL: $URL"
+            else
+              echo "::error::无法确定部署 URL"
+              exit 1
+            fi
+          fi
+
+          echo "DEPLOY_URL=$URL" >> $GITHUB_ENV
+          echo ""
+          echo "✅ 部署完成"
+          echo "   📍 区域: $DEPLOY_REGION ($REGION_DESC)"
+          echo "   🔗 URL: $URL"
+          echo "   📋 订阅: $URL/${{ env.SUB_PATH }}"
+
+      - name: 触发初始保活
+        run: |
+          echo "⏳ 等待部署稳定..."
+          sleep 12
+          for i in 1 2 3; do
+            echo "📡 第 $i 次请求: $DEPLOY_URL"
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$DEPLOY_URL" || echo "000")
+            echo "   -> HTTP $HTTP_STATUS"
+            if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "404" ] || [ "$HTTP_STATUS" = "405" ]; then
+              echo "✅ 服务已响应"
+              break
+            fi
+            if [ $i -lt 3 ]; then
+              sleep 15
+            fi
+          done
+          # 也尝试订阅路径
+          curl -s -o /dev/null -w "订阅路径 HTTP %{http_code}\n" --max-time 20 "$DEPLOY_URL/${{ env.SUB_PATH }}" || true
+
+      - name: 更新操作日志（可选）
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+        continue-on-error: true
+        run: |
+          CURRENT_TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          echo "最后一次部署: $CURRENT_TIME | 区域: $DEPLOY_REGION | URL: $DEPLOY_URL" > click_log.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add click_log.txt
+          if git diff --cached --quiet; then
+            echo "无变化"
+          else
+            git commit -m "deploy: $CURRENT_TIME ($DEPLOY_REGION)"
+            git push
+          fi
+
+      - name: 清理历史运行记录
+        uses: Mattraks/delete-workflow-runs@v2
+        continue-on-error: true
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          delete_workflow_pattern: ${{ github.workflow }}
+          retain_days: 0
+          keep_minimum_runs: 2
+
+  stop:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'stop'
+    runs-on: ubuntu-latest
+    env:
+      MODAL_APP_NAME: ${{ secrets.MODAL_APP_NAME || 'proxy-app' }}
+    steps:
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装 Modal
+        run: pip install modal
+
+      - name: 配置令牌并停止应用
+        run: |
+          modal token set --token-id "${{ secrets.MODAL_TOKEN_ID }}" --token-secret "${{ secrets.MODAL_TOKEN_SECRET }}"
+          echo "🛑 正在停止应用: ${{ env.MODAL_APP_NAME }}"
+          modal app stop "${{ env.MODAL_APP_NAME }}" || true
+          echo "✅ 停止操作完成"
