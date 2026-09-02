@@ -40,11 +40,9 @@ image = (
 
 app = modal.App(MODAL_APP_NAME, image=image)
 
-# 支持两套 Secret（也可合并成一个）
-app_secrets = [
-    modal.Secret.from_name("modal-secrets"),   # UUID / ARGO_* / CFIP 等
-    modal.Secret.from_name("nezha-secrets"),    # NEZHA_* 等
-]
+# ==================== Secret（只使用 modal-secrets，没有就跳过 nezha）====================
+# 请把所有变量（包括 NEZHA_*）都放到名为 modal-secrets 的 Secret 中
+app_secrets = [modal.Secret.from_name("modal-secrets")]
 
 subscription_dict = modal.Dict.from_name("modal-dict-data", create_if_missing=True)
 
@@ -413,7 +411,7 @@ ingress:
     subscription_dict["content"] = base64.b64encode(links.encode()).decode()
     print("✅ Subscription saved")
 
-    # ---------- Nezha ----------
+    # ---------- Nezha（没有相关环境变量会自动跳过）----------
     ensure_agent_started()
 
     if MODAL_USER_NAME:
@@ -422,9 +420,6 @@ ingress:
     print("=" * 50)
 
     yield
-    # 关闭时可按需清理
-    # subprocess.run("pkill -f web || true", shell=True)
-    # subprocess.run("pkill -f bot || true", shell=True)
 
 # ==================== FastAPI ====================
 web = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
@@ -512,15 +507,15 @@ async def restart():
     ensure_agent_started()
     return {"killed": killed, "message": "restarted"}
 
-# ==================== Modal 入口（已修复）====================
+# ==================== Modal 入口 ====================
 @app.function(
     secrets=app_secrets,
     timeout=86400,
-    min_containers=1,              # 正确参数名（禁止使用 keep_warm）
+    min_containers=1,
     scaledown_window=300,
     region=DEPLOY_REGION,
 )
 @modal.concurrent(max_inputs=20)
 @modal.asgi_app()
-def web_server():                  # 函数名不要与 FastAPI 实例同名
+def web_server():
     return web
