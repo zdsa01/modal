@@ -1,1 +1,1 @@
-最后一次部署: 2026-09-03 09:25:22 UTC | 区域: ap-melbourne-1 | URL: https://zdsa--proxy-app-web_server.modal.run
+最后一次部署: 2026-09-03 09:28:23 UTC | 区域: australia-southeast1 | URL: https://zdsa--proxy-app-web_server.modal.run
